@@ -572,9 +572,6 @@ function lattice_from_data(
   s::QQFieldElem=QQ(1),
 )
   @assert length(V) == binomial(n+1, 2)
-  if !isone(s)
-    map!(Base.Fix2(mul!, s), V)
-  end
   M = zero_matrix(QQ, n, n)
   k = 0
   for i in 1:n
@@ -582,6 +579,9 @@ function lattice_from_data(
       k += 1
       M[i, j] = M[j, i] = V[k]
     end
+  end
+  if !isone(s)
+    M = s*M
   end
   return integer_lattice(; gram=M, cached=false)
 end
@@ -789,7 +789,7 @@ function save_genus!(
   tmp_path = joinpath(path(db), "temporary", tmp_label)
   mv(_tmp_path, tmp_path)
   for i in 1:length(lats)
-    Base.write(io, data_from_lattice(lats[i])*"\n")
+    Base.write(io, data_from_lattice(lats[i], s)*"\n")
   end
   close(io)
 
